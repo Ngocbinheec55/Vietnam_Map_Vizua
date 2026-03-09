@@ -4,21 +4,21 @@ import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+  // Load env từ cả file .env (local) và biến môi trường (GitHub Actions)
+  const env = loadEnv(mode, process.cwd(), '');
+  
   return {
+    // PHẢI khớp với tên Repo trên thanh địa chỉ trình duyệt
+    base: '/Vietnam_Map_Vizua/', 
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      // Hỗ trợ cả khi chạy local và khi build trên GitHub
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY),
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(process.cwd(), '.'),
       },
-    },
-    server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
     },
   };
 });
